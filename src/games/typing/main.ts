@@ -97,6 +97,8 @@ const bestKey = () => (settings.mode === 'words' ? `words:${settings.words}:${se
 const root = document.querySelector<HTMLElement>('[data-typing]')!;
 const find = <T extends HTMLElement>(selector: string) => root.querySelector<T>(selector)!;
 const modes = find('[data-modes]');
+const end = find('[data-end]');
+const langs = find('[data-langs]');
 const options = find('[data-options]');
 const stats = {
 	time: find('[data-stat="time"]'),
@@ -152,44 +154,37 @@ const drawPickers = () => {
 		button.setAttribute('aria-pressed', String(button.dataset.setMode === settings.mode));
 	}
 
-	// `words` picks its language and length side by side; `code` picks a language; `shell` has nothing to pick.
-	type Choice = { kind: 'words' | 'seconds' | 'code'; value: string; label: string; on: boolean; name?: string };
-	const choices: Choice[] =
-		settings.mode === 'words'
-			? [
-					...LANGS.map((code): Choice => ({
-						kind: 'words',
-						value: code,
-						label: code,
-						on: code === settings.words,
-						name: t.wordsIn[code],
-					})),
-					...DURATIONS.map((seconds): Choice => ({
-						kind: 'seconds',
-						value: String(seconds),
-						label: `${seconds}s`,
-						on: seconds === settings.seconds,
-					})),
-				]
-			: settings.mode === 'code'
-				? CODE_CHOICES.map((code): Choice => ({ kind: 'code', value: code, label: code === 'mix' ? t.mix : code, on: code === settings.code }))
-				: [];
-	options.hidden = !choices.length;
-	options.setAttribute('aria-label', t.options);
-	options.replaceChildren(
-		...choices.map(({ kind, value, label, on, name }, index) => {
-			const button = element('button', 'typing__tab', label);
-			button.type = 'button';
-			button.dataset.kind = kind;
-			button.dataset.option = value;
-			button.setAttribute('aria-pressed', String(on));
-			if (name) button.setAttribute('aria-label', name);
-			if (name) button.title = name;
-			// A heavier rule where one set of choices ends and the next begins.
-			if (index && choices[index - 1].kind !== kind) button.classList.add('typing__tab--split');
-			return button;
+	const pick = (className: string, kind: string, value: string, label: string, on: boolean) => {
+		const button = element('button', className, label);
+		button.type = 'button';
+		button.dataset.kind = kind;
+		button.dataset.option = value;
+		button.setAttribute('aria-pressed', String(on));
+		return button;
+	};
+
+	// `words` picks the words' language (EN / ID, like the navbar's switch) and the round's length;
+	// `code` picks a language; `shell` has nothing to pick.
+	langs.hidden = settings.mode !== 'words';
+	langs.replaceChildren(
+		...LANGS.flatMap((code, index) => {
+			const button = pick('typing__lang', 'words', code, code, code === settings.words);
+			button.setAttribute('aria-label', t.wordsIn[code]);
+			button.title = t.wordsIn[code];
+			const separator = element('span', 'typing__sep', '/');
+			separator.setAttribute('aria-hidden', 'true');
+			return index ? [separator, button] : [button];
 		}),
 	);
+	const choices =
+		settings.mode === 'words'
+			? DURATIONS.map((seconds) => pick('typing__tab', 'seconds', String(seconds), `${seconds}s`, seconds === settings.seconds))
+			: settings.mode === 'code'
+				? CODE_CHOICES.map((code) => pick('typing__tab', 'code', code, code === 'mix' ? t.mix : code, code === settings.code))
+				: [];
+	options.hidden = !choices.length;
+	options.replaceChildren(...choices);
+	end.hidden = langs.hidden && options.hidden;
 
 	const key = (name: string) => element('kbd', '', name);
 	const hint = (keys: string[], label: string) => {
@@ -216,7 +211,7 @@ modes.addEventListener('click', (event) => {
 	input.focus();
 });
 
-options.addEventListener('click', (event) => {
+end.addEventListener('click', (event) => {
 	const button = (event.target as HTMLElement).closest<HTMLButtonElement>('[data-option]');
 	if (!button) return;
 	const value = button.dataset.option;
@@ -625,7 +620,7 @@ input.addEventListener('keydown', (event) => {
 
 // A click on a picker or restart leaves the focus in the text, so it doesn't blur for a moment in between.
 root.addEventListener('mousedown', (event) => {
-	if ((event.target as HTMLElement).closest('.typing__tab, .typing__restart')) event.preventDefault();
+	if ((event.target as HTMLElement).closest('.typing__tab, .typing__lang, .typing__restart')) event.preventDefault();
 });
 
 input.addEventListener('paste', (event) => event.preventDefault());

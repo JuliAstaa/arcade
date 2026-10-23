@@ -1,6 +1,6 @@
 ---
 /*
- * The typing test's markup, in English; main.ts switches the words to
+ * The typing test's markup, in English; main.ts switches its labels to
  * Indonesian with ?lang=id, draws the text and runs the rounds.
  */
 import './style.css';
@@ -9,14 +9,17 @@ import './style.css';
 <main class="typing" data-typing data-mode="words">
 	<h1 class="visually-hidden" data-i18n="title">Typing test</h1>
 
+	<!-- Built like the portfolio's navbar: the modes as its links, the round's choices in cells on the right. -->
 	<div class="typing__bar">
-		<div class="typing__group" role="group" aria-label="Mode" data-modes>
+		<div class="typing__modes" role="group" aria-label="Mode" data-modes data-i18n-label="mode">
 			<button class="typing__tab" type="button" data-set-mode="words" data-i18n="modes.words">words</button>
 			<button class="typing__tab" type="button" data-set-mode="code" data-i18n="modes.code">code</button>
 			<button class="typing__tab" type="button" data-set-mode="shell" data-i18n="modes.shell">shell</button>
 		</div>
-		<div class="typing__spacer"></div>
-		<div class="typing__group" role="group" aria-label="Round" data-options></div>
+		<div class="typing__end" data-end>
+			<div class="typing__langs" role="group" aria-label="Words language" data-langs data-i18n-label="language"></div>
+			<div class="typing__options" role="group" aria-label="Round" data-options data-i18n-label="options"></div>
+		</div>
 	</div>
 
 	<div class="typing__stats">
