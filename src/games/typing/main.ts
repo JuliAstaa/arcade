@@ -654,6 +654,15 @@ input.addEventListener('blur', refocus);
 addEventListener('focus', refocus);
 addEventListener('blur', refocus);
 
+// Embedded, the focus() at load is dropped: a cross-origin frame can't take the focus before the visitor has
+// touched it. When the portfolio then focuses the frame and nothing inside has it, the text takes it, or the
+// result card if a round has just ended.
+addEventListener('focus', () => {
+	if (!fine.matches || (document.activeElement && document.activeElement !== document.body)) return;
+	if (over) resultCard.focus({ preventScroll: true });
+	else input.focus({ preventScroll: true });
+});
+
 // Line breaks move when the box resizes or the fonts arrive.
 new ResizeObserver(() => place()).observe(box);
 document.fonts?.ready.then(() => place());

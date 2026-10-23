@@ -479,7 +479,14 @@ addEventListener('keydown', (event) => {
 		close();
 		return;
 	}
-	if (phase !== 'playing' || event.ctrlKey || event.metaKey || event.altKey) return;
+	if (event.ctrlKey || event.metaKey || event.altKey) return;
+	// On the rules, Enter or Space starts the run wherever the focus is; a focused button handles its own.
+	if (phase === 'intro' && (event.key === 'Enter' || event.key === ' ') && !(event.target instanceof HTMLButtonElement)) {
+		event.preventDefault();
+		startRun(runSeed);
+		return;
+	}
+	if (phase !== 'playing') return;
 	if (event.key === 'r' || event.key === 'R') {
 		event.preventDefault();
 		restartLevel();
@@ -496,6 +503,18 @@ restartButton.addEventListener('click', restartLevel);
 
 new ResizeObserver(fitBoard).observe(wrap);
 narrow.addEventListener('change', fitBoard);
+
+/*
+ * Embedded, the focus() calls below are dropped: a cross-origin frame can't take the focus before the
+ * visitor has touched it. When the portfolio then focuses the frame, nothing inside has it, so it goes to
+ * what the screen is about: the start button, the board, or the result card.
+ */
+addEventListener('focus', () => {
+	if (document.activeElement && document.activeElement !== document.body) return;
+	if (phase === 'intro') startButton.focus({ preventScroll: true });
+	else if (phase === 'over') over.focus({ preventScroll: true });
+	else focusTile(cursor);
+});
 
 // ---------- Go ----------
 
