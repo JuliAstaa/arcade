@@ -1,0 +1,14 @@
+{
+	"$schema": "https://openapi.vercel.sh/vercel.json",
+	"headers": [
+		{
+			"source": "/(.*)",
+			"headers": [
+				{
+					"key": "Content-Security-Policy",
+					"value": "frame-ancestors 'self' https://www.juliasta.my.id https://juliasta.my.id http://localhost:4321"
+				}
+			]
+		}
+	]
+}

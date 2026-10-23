@@ -1,0 +1,107 @@
+---
+/*
+ * The page around a game. Standalone, a small header (Arcade / the game) over
+ * a window on the cream page. Embedded (?embed=1), just the game, filling the
+ * frame: the portfolio's popup brings its own title bar and close button.
+ * Language choices that matter to play, like the words to type, live in the
+ * game itself.
+ */
+import Layout from './Layout.astro';
+
+interface Props {
+	title: string;
+	description: string;
+	/** The game's name in the header. */
+	name: string;
+}
+
+const { title, description, name } = Astro.props;
+---
+
+<Layout title={title} description={description}>
+	<div class="app">
+		<header class="chrome">
+			<a class="chrome__home label" href="/">Arcade</a>
+			<span class="chrome__sep label" aria-hidden="true">/</span>
+			<span class="chrome__page label">{name}</span>
+		</header>
+		<slot />
+	</div>
+</Layout>
+
+<script>
+	// A phone's on-screen keyboard covers the page without resizing it, so the page is fitted to what's still visible.
+	const viewport = window.visualViewport;
+	const fit = () => {
+		if (!viewport || viewport.scale > 1.01) return;
+		const style = document.documentElement.style;
+		style.setProperty('--visible', `${Math.round(viewport.height)}px`);
+		style.setProperty('--offset', `${Math.round(viewport.offsetTop)}px`);
+	};
+	viewport?.addEventListener('resize', fit);
+	viewport?.addEventListener('scroll', fit);
+	fit();
+</script>
+
+<style is:global>
+	html,
+	body {
+		height: 100%;
+	}
+
+	body {
+		overflow: hidden;
+	}
+</style>
+
+<style>
+	/* Pinned to the visible part of the screen, which a phone's keyboard shrinks (see fit() above). */
+	.app {
+		position: fixed;
+		top: var(--offset, 0px);
+		right: 0;
+		left: 0;
+		display: flex;
+		flex-direction: column;
+		height: var(--visible, 100%);
+		padding: 0 16px 16px;
+	}
+
+	:root[data-embed] .app {
+		padding: 0;
+	}
+
+	.chrome {
+		display: flex;
+		flex: none;
+		gap: 10px;
+		align-items: center;
+		width: min(880px, 100%);
+		height: 52px;
+		margin: 0 auto;
+		color: var(--muted);
+	}
+
+	.chrome__home {
+		color: var(--ink);
+		text-decoration: none;
+	}
+
+	.chrome__home:hover {
+		color: var(--accent);
+	}
+
+	:root[data-embed] .chrome {
+		display: none;
+	}
+
+	@media (max-width: 559px) {
+		.app {
+			padding: 0;
+		}
+
+		.chrome {
+			padding: 0 16px;
+		}
+	}
+</style>

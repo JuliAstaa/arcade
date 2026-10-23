@@ -1,0 +1,635 @@
+/*
+ * The test's window. GameLayout (src/layouts/) puts it on the page: centred under
+ * the header standalone, filling the frame when embedded.
+ */
+
+/* ---------- The window ---------- */
+
+.typing {
+	display: flex;
+	flex: 0 1 600px;
+	flex-direction: column;
+	width: min(880px, 100%);
+	min-height: 0;
+	margin: auto;
+	border: 1px solid var(--line-strong);
+	background: var(--bg);
+	color: var(--ink);
+	font-family: var(--font-mono);
+	font-size: 0.8rem;
+	line-height: 1.5;
+}
+
+:root[data-embed] .typing {
+	flex: 1;
+	width: 100%;
+	border: 0;
+}
+
+/* ---------- Mode and round pickers ---------- */
+
+.typing__bar {
+	display: grid;
+	flex: none;
+	grid-template-columns: auto 1fr auto;
+	gap: 1px;
+	border-bottom: 1px solid var(--line);
+	background: var(--line);
+}
+
+.typing__spacer {
+	background: var(--bg);
+}
+
+.typing__group {
+	display: grid;
+	grid-auto-columns: minmax(0, 1fr);
+	grid-auto-flow: column;
+	gap: 1px;
+}
+
+.typing__group[hidden] {
+	display: none;
+}
+
+.typing__tab {
+	min-width: 0;
+	min-height: 40px;
+	padding: 0 16px;
+	border: 0;
+	background: var(--bg);
+	color: var(--muted);
+	font-family: var(--font-mono);
+	font-size: 0.68rem;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	cursor: pointer;
+	touch-action: manipulation;
+	-webkit-tap-highlight-color: transparent;
+	transition:
+		background-color 0.2s,
+		color 0.2s;
+}
+
+.typing__tab:hover {
+	background: var(--bg-raised);
+	color: var(--ink);
+}
+
+.typing__tab[aria-pressed='true'] {
+	background: var(--bg-raised);
+	color: var(--ink);
+	box-shadow: inset 0 -2px var(--accent);
+}
+
+.typing__tab:focus-visible {
+	outline-offset: -4px;
+}
+
+/* Where one set of choices ends and the next begins, e.g. the words' language and the round's length. */
+.typing__tab--split {
+	margin-left: 2px;
+}
+
+/* ---------- Stats ---------- */
+
+.typing__stats {
+	display: grid;
+	flex: none;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 1px;
+	background: var(--line);
+}
+
+.typing__stat {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	min-width: 0;
+	padding: 12px 16px;
+	background: var(--bg);
+}
+
+.typing__stat-label,
+.typing__score-label {
+	color: var(--muted);
+	font-size: 0.66rem;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+}
+
+.typing__stat-value {
+	font-family: var(--font-display);
+	font-size: 1.25rem;
+	font-variant-numeric: tabular-nums;
+	font-weight: 700;
+	line-height: 1.1;
+}
+
+/* Time used in a `words` round, or how far through the text in the others. */
+.typing__meter {
+	flex: none;
+	height: 3px;
+	background: var(--line);
+}
+
+.typing__meter span {
+	display: block;
+	height: 100%;
+	background: var(--ink);
+	transform: scaleX(0);
+	transform-origin: left;
+}
+
+.typing[data-hurry] [data-stat='time'] {
+	color: var(--accent);
+}
+
+.typing[data-hurry] .typing__meter span {
+	background: var(--accent);
+}
+
+/* ---------- The text ---------- */
+
+.typing__stage {
+	position: relative;
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	gap: 14px;
+	min-height: 0;
+	padding: clamp(16px, 4vw, 32px);
+	overflow: hidden;
+}
+
+.typing__source {
+	flex: none;
+	margin: 0;
+	overflow: hidden;
+	color: var(--muted);
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.typing__text {
+	--lh: 1.7em;
+	position: relative;
+	flex: 1;
+	min-height: 0;
+	overflow: hidden;
+	font-size: 0.95rem;
+	/* Every character as typed: JetBrains Mono would otherwise draw >= as ≥ and -> as an arrow. */
+	font-variant-ligatures: none;
+	font-feature-settings:
+		'calt' 0,
+		'liga' 0;
+	transition:
+		filter 0.2s,
+		opacity 0.2s;
+}
+
+/* Words: three lines at a time, a size up, in the middle of the stage. */
+.typing[data-mode='words'] .typing__text {
+	--lh: 1.65em;
+	flex: none;
+	height: calc(var(--lh) * 3);
+	margin-block: auto;
+	font-size: 1.45rem;
+}
+
+.typing__inner {
+	position: relative;
+	color: var(--muted);
+	line-height: var(--lh);
+}
+
+.word {
+	white-space: nowrap;
+}
+
+/* A line too long for the box wraps under itself, two columns in from its own indentation. */
+.line {
+	--hang: calc(var(--indent, 0ch) + 2ch);
+	min-height: var(--lh);
+	padding-left: var(--hang);
+	text-indent: calc(-1 * var(--hang));
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+}
+
+.typing[data-mode='shell'] .line::before {
+	content: '$ ';
+	color: var(--accent);
+}
+
+.ch[data-mark='right'] {
+	color: var(--ink);
+}
+
+.ch[data-mark='wrong'] {
+	color: var(--accent);
+}
+
+.ch--space[data-mark='wrong'] {
+	background: color-mix(in srgb, var(--accent) 24%, transparent);
+}
+
+/* Typed past the end of a word or line: shown where it landed, until backspace takes it back. */
+.ch--extra {
+	opacity: 0.7;
+}
+
+/* The rest of a word left behind with space: not typed, but underlined as missed. */
+.ch[data-mark='skipped'] {
+	text-decoration: underline 1px var(--accent);
+	text-underline-offset: 0.3em;
+}
+
+/* Where enter goes, faint, so the end of each line is clear; it stays faint once typed. */
+.ch--enter,
+.ch--enter[data-mark] {
+	padding-left: 0.3em;
+	color: var(--line-strong);
+}
+
+/* A key that can't land: enter in the middle of a line, or one extra too many. */
+.ch[data-held] {
+	background: color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+.typing__caret {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 2px;
+	height: calc(var(--lh) * 0.64);
+	margin-top: calc(var(--lh) * 0.18);
+	border-radius: 1px;
+	background: var(--accent);
+	pointer-events: none;
+}
+
+.typing__caret[hidden] {
+	display: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	.typing__inner {
+		transition: transform 0.18s var(--ease-out);
+	}
+
+	/* The caret's glide is a spring in main.ts, not a transition here. */
+	.ch {
+		transition: color 0.07s;
+	}
+
+	.typing:not([data-active]) .typing__caret {
+		animation: typing-blink 1s steps(1, end) infinite;
+	}
+
+	.typing__meter span {
+		transition: transform 0.1s linear;
+	}
+}
+
+@keyframes typing-blink {
+	50% {
+		opacity: 0;
+	}
+}
+
+/* Laid over the stage and see-through: a click or tap anywhere on the text lands in it. */
+.typing__input {
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+	border: 0;
+	outline: none;
+	background: transparent;
+	color: transparent;
+	caret-color: transparent;
+	/* 16px or more, or iOS zooms in on the field when it's focused. */
+	font-size: 16px;
+	opacity: 0;
+	resize: none;
+	cursor: text;
+	-webkit-tap-highlight-color: transparent;
+}
+
+.typing__focus {
+	position: absolute;
+	inset: 0;
+	display: grid;
+	place-items: center;
+	margin: 0;
+	padding: 16px;
+	color: var(--ink);
+	text-align: center;
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity 0.2s;
+}
+
+.typing[data-blurred] .typing__focus {
+	opacity: 1;
+}
+
+.typing[data-blurred] .typing__text,
+.typing[data-blurred] .typing__source {
+	opacity: 0.4;
+	filter: blur(3px);
+}
+
+/* ---------- Result ---------- */
+
+/* Centred by auto margins rather than justify-content, so a card taller than the stage scrolls from its top. */
+.typing__result {
+	position: absolute;
+	inset: 0;
+	z-index: 2;
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	padding: clamp(16px, 4vw, 32px);
+	overflow-y: auto;
+	background: var(--bg);
+}
+
+.typing__result[hidden] {
+	display: none;
+}
+
+/* Focused when it opens, to catch stray keys; its buttons show the focus instead. */
+.typing__result:focus {
+	outline: none;
+}
+
+.typing__result > :first-child {
+	margin-top: auto;
+}
+
+.typing__result > :last-child {
+	margin-bottom: auto;
+}
+
+.typing__scores {
+	display: grid;
+	grid-template-columns: 1.5fr repeat(4, minmax(0, 1fr));
+	gap: 1px;
+	border: 1px solid var(--line);
+	background: var(--line);
+}
+
+.typing__score {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	justify-content: flex-end;
+	min-width: 0;
+	padding: 12px 14px;
+	background: var(--bg);
+}
+
+.typing__score-value {
+	font-family: var(--font-display);
+	font-size: 1.35rem;
+	font-variant-numeric: tabular-nums;
+	font-weight: 700;
+	line-height: 1;
+}
+
+.typing__score--main .typing__score-value {
+	font-size: clamp(2.6rem, 2rem + 3vw, 3.6rem);
+	font-weight: 800;
+	letter-spacing: -0.04em;
+}
+
+.typing__best {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px 12px;
+	align-items: baseline;
+	margin: 0;
+}
+
+.typing__new,
+.typing__clean {
+	font-family: var(--font-serif);
+	font-size: 1.45rem;
+	font-style: italic;
+	line-height: 1.1;
+}
+
+.typing__new {
+	color: var(--accent);
+}
+
+.typing__clean {
+	color: var(--ink-soft);
+	font-size: 1.15rem;
+}
+
+.typing__was {
+	color: var(--muted);
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+.typing__missed {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px 14px;
+	align-items: center;
+}
+
+.typing__keys {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px 14px;
+	align-items: center;
+}
+
+.typing__key {
+	display: inline-flex;
+	gap: 6px;
+	align-items: center;
+	color: var(--muted);
+}
+
+.typing kbd {
+	display: inline-grid;
+	place-items: center;
+	min-width: 1.9em;
+	height: 1.9em;
+	padding: 0 0.45em;
+	border: 1px solid var(--line-strong);
+	border-bottom-width: 2px;
+	background: var(--bg-raised);
+	color: var(--ink);
+	font-family: var(--font-mono);
+	font-size: 0.72rem;
+	font-weight: 500;
+	line-height: 1;
+}
+
+.typing__actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+}
+
+.typing__button {
+	min-height: 44px;
+	padding: 0 22px;
+	border: 1px solid var(--ink);
+	background: var(--ink);
+	color: var(--bg);
+	font-family: var(--font-mono);
+	font-size: 0.72rem;
+	font-weight: 500;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	cursor: pointer;
+	touch-action: manipulation;
+	transition:
+		background-color 0.2s,
+		color 0.2s;
+}
+
+.typing__button:hover {
+	background: var(--ink-soft);
+}
+
+.typing__button--quiet {
+	border-color: var(--line-strong);
+	background: transparent;
+	color: var(--ink);
+}
+
+.typing__button--quiet:hover {
+	background: var(--bg-raised);
+}
+
+/* ---------- Footer ---------- */
+
+.typing__foot {
+	display: flex;
+	flex: none;
+	gap: 12px;
+	align-items: stretch;
+	justify-content: space-between;
+	min-height: 40px;
+	border-top: 1px solid var(--line);
+}
+
+.typing__hints {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px 18px;
+	align-items: center;
+	margin: 0;
+	padding: 8px 16px;
+	color: var(--muted);
+	font-size: 0.68rem;
+}
+
+.typing__hint {
+	display: inline-flex;
+	gap: 5px;
+	align-items: center;
+}
+
+.typing__hint kbd {
+	height: 1.7em;
+	font-size: 0.64rem;
+}
+
+.typing__hint span {
+	margin-left: 3px;
+}
+
+.typing__restart {
+	flex: none;
+	margin-left: auto;
+	padding: 0 18px;
+	border: 0;
+	border-left: 1px solid var(--line);
+	background: transparent;
+	color: var(--ink-soft);
+	font-family: var(--font-mono);
+	font-size: 0.68rem;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	cursor: pointer;
+	touch-action: manipulation;
+}
+
+.typing__restart:hover {
+	background: var(--bg-raised);
+	color: var(--ink);
+}
+
+.typing__restart:focus-visible {
+	outline-offset: -4px;
+}
+
+/* Keyboard hints mean nothing on a touch screen; the restart button stays. */
+@media (pointer: coarse) {
+	.typing__hints {
+		display: none;
+	}
+}
+
+/* ---------- Phones ---------- */
+
+@media (max-width: 559px) {
+	.typing {
+		flex: 1;
+		border-width: 1px 0 0;
+	}
+
+	.typing__bar {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.typing__spacer {
+		display: none;
+	}
+
+	.typing__tab {
+		padding: 0 8px;
+	}
+
+	.typing__stat {
+		padding: 10px 12px;
+	}
+
+	.typing__stat-value {
+		font-size: 1.05rem;
+	}
+
+	.typing__stage {
+		gap: 10px;
+	}
+
+	.typing__text {
+		font-size: 0.8rem;
+	}
+
+	.typing[data-mode='words'] .typing__text {
+		font-size: 1.15rem;
+	}
+
+	.typing__scores {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.typing__score--main {
+		grid-column: span 2;
+	}
+}

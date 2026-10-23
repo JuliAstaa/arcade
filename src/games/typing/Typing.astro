@@ -1,0 +1,106 @@
+---
+/*
+ * The typing test's markup, in English; main.ts switches the words to
+ * Indonesian with ?lang=id, draws the text and runs the rounds.
+ */
+import './style.css';
+---
+
+<main class="typing" data-typing data-mode="words">
+	<h1 class="visually-hidden" data-i18n="title">Typing test</h1>
+
+	<div class="typing__bar">
+		<div class="typing__group" role="group" aria-label="Mode" data-modes>
+			<button class="typing__tab" type="button" data-set-mode="words" data-i18n="modes.words">words</button>
+			<button class="typing__tab" type="button" data-set-mode="code" data-i18n="modes.code">code</button>
+			<button class="typing__tab" type="button" data-set-mode="shell" data-i18n="modes.shell">shell</button>
+		</div>
+		<div class="typing__spacer"></div>
+		<div class="typing__group" role="group" aria-label="Round" data-options></div>
+	</div>
+
+	<div class="typing__stats">
+		<div class="typing__stat">
+			<span class="typing__stat-label" data-i18n="stats.time">time</span>
+			<span class="typing__stat-value" data-stat="time">00:30</span>
+		</div>
+		<div class="typing__stat">
+			<span class="typing__stat-label" data-i18n="stats.wpm">wpm</span>
+			<span class="typing__stat-value" data-stat="wpm">0</span>
+		</div>
+		<div class="typing__stat">
+			<span class="typing__stat-label" data-i18n="stats.accuracy">accuracy</span>
+			<span class="typing__stat-value" data-stat="accuracy">100%</span>
+		</div>
+		<div class="typing__stat">
+			<span class="typing__stat-label" data-i18n="stats.best">best</span>
+			<span class="typing__stat-value" data-stat="best">–</span>
+		</div>
+	</div>
+	<div class="typing__meter" aria-hidden="true"><span data-meter></span></div>
+
+	<div class="typing__stage">
+		<p class="typing__source label" data-source></p>
+		<div class="typing__text" aria-hidden="true" data-text>
+			<div class="typing__inner" data-inner></div>
+		</div>
+		<p class="visually-hidden" id="typing-source" data-source-text></p>
+		<textarea
+			class="typing__input"
+			aria-label="Type the text shown"
+			aria-describedby="typing-source"
+			autocomplete="off"
+			autocapitalize="off"
+			autocorrect="off"
+			spellcheck="false"
+			rows="1"
+			data-input
+			data-i18n-label="input"></textarea>
+		<p class="typing__focus label" aria-hidden="true" data-focus></p>
+
+		<section class="typing__result" aria-labelledby="typing-wpm" tabindex="-1" hidden data-result>
+			<div class="typing__scores">
+				<div class="typing__score typing__score--main">
+					<span class="typing__score-label" id="typing-wpm" data-i18n="result.wpm">wpm</span>
+					<span class="typing__score-value" data-score="wpm"></span>
+				</div>
+				<div class="typing__score">
+					<span class="typing__score-label" data-i18n="result.raw">raw</span>
+					<span class="typing__score-value" data-score="raw"></span>
+				</div>
+				<div class="typing__score">
+					<span class="typing__score-label" data-i18n="result.accuracy">accuracy</span>
+					<span class="typing__score-value" data-score="accuracy"></span>
+				</div>
+				<div class="typing__score">
+					<span class="typing__score-label" data-i18n="result.time">time</span>
+					<span class="typing__score-value" data-score="time"></span>
+				</div>
+				<div class="typing__score">
+					<span class="typing__score-label" data-i18n="result.chars">chars</span>
+					<span class="typing__score-value" data-score="chars"></span>
+				</div>
+			</div>
+			<p class="typing__best" data-best></p>
+			<div class="typing__missed">
+				<span class="typing__score-label" data-i18n="result.missed">most-missed keys</span>
+				<span class="typing__keys" data-missed></span>
+			</div>
+			<div class="typing__actions">
+				<button class="typing__button" type="button" data-next data-i18n="result.next">next</button>
+				<button class="typing__button typing__button--quiet" type="button" data-retry data-i18n="result.retry">retry</button>
+			</div>
+		</section>
+	</div>
+
+	<div class="typing__foot">
+		<p class="typing__hints" data-hints></p>
+		<button class="typing__restart" type="button" data-restart data-i18n="restart">restart</button>
+	</div>
+
+	<p class="visually-hidden" aria-live="polite" data-announce></p>
+</main>
+
+<script>
+	import './main';
+</script>

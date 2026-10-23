@@ -1,0 +1,43 @@
+---
+import { Font } from 'astro:assets';
+import '../styles/theme.css';
+
+interface Props {
+	title: string;
+	description: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>{title}</title>
+		<meta name="description" content={description} />
+		<meta name="author" content="Juli Astawa" />
+		<meta name="theme-color" content="#f3efe7" media="(prefers-color-scheme: light)" />
+		<meta name="theme-color" content="#131210" media="(prefers-color-scheme: dark)" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<Font cssVariable="--font-display" preload />
+		<Font cssVariable="--font-serif" />
+		<Font cssVariable="--font-sans" preload />
+		<Font cssVariable="--font-mono" preload />
+		<script is:inline>
+			// Before first paint: the theme and language from the URL, and whether the page is embedded.
+			(() => {
+				const params = new URLSearchParams(location.search);
+				const root = document.documentElement;
+				const theme = params.get('theme');
+				if (theme === 'light' || theme === 'dark') root.dataset.theme = theme;
+				if (params.get('lang') === 'id') root.lang = 'id';
+				if (params.get('embed') === '1') root.dataset.embed = '';
+			})();
+		</script>
+	</head>
+	<body>
+		<slot />
+	</body>
+</html>

@@ -1,0 +1,120 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+// One card per game, in the order they were made.
+const games = [
+	{ href: '/typing/', name: 'Typing test', about: 'Words, Go, Python and SQL snippets, and real shell commands.' },
+];
+---
+
+<Layout title="Arcade · Juli Astawa" description="Small browser games by Juli Astawa.">
+	<main class="home">
+		<p class="home__kicker label">Small browser games</p>
+		<h1 class="home__title">Arcade <em>by Juli</em></h1>
+		<ul class="home__games">
+			{
+				games.map((game, index) => (
+					<li class="home__game">
+						<a href={game.href}>
+							<span class="home__index label">{String(index + 1).padStart(2, '0')}</span>
+							<span class="home__name">{game.name}</span>
+							<span class="home__about">{game.about}</span>
+						</a>
+					</li>
+				))
+			}
+		</ul>
+		<a class="home__back label" href="https://www.juliasta.my.id">juliasta.my.id</a>
+	</main>
+</Layout>
+
+<style>
+	.home {
+		width: min(880px, 100% - 32px);
+		margin: 0 auto;
+		padding: clamp(40px, 10vh, 96px) 0 48px;
+	}
+
+	.home__kicker {
+		margin: 0 0 16px;
+		color: var(--muted);
+	}
+
+	.home__title {
+		margin: 0;
+		font-family: var(--font-display);
+		font-size: clamp(3rem, 2rem + 6vw, 6rem);
+		font-weight: 800;
+		letter-spacing: -0.04em;
+		line-height: 0.95;
+		text-transform: uppercase;
+	}
+
+	.home__title em {
+		font-family: var(--font-serif);
+		font-weight: 400;
+		letter-spacing: -0.01em;
+		text-transform: none;
+	}
+
+	/* Hairlines from the gaps; cards grow to fill each row, so no empty cell shows the rule colour. */
+	.home__games {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 1px;
+		margin: 48px 0 0;
+		padding: 0;
+		border: 1px solid var(--line);
+		background: var(--line);
+		list-style: none;
+	}
+
+	.home__game {
+		flex: 1 1 260px;
+	}
+
+	.home__game a {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		height: 100%;
+		padding: 20px;
+		background: var(--bg);
+		text-decoration: none;
+		transition: background-color 0.2s;
+	}
+
+	.home__game a:hover {
+		background: var(--bg-raised);
+	}
+
+	.home__game a:focus-visible {
+		outline-offset: -4px;
+	}
+
+	.home__index {
+		color: var(--accent);
+	}
+
+	.home__name {
+		font-family: var(--font-display);
+		font-size: 1.5rem;
+		font-weight: 700;
+		line-height: 1.1;
+	}
+
+	.home__about {
+		color: var(--ink-soft);
+		font-size: 0.95rem;
+	}
+
+	.home__back {
+		display: inline-block;
+		margin-top: 32px;
+		color: var(--muted);
+	}
+
+	.home__back:hover {
+		color: var(--ink);
+	}
+</style>

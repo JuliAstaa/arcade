@@ -1,0 +1,81 @@
+import type { Lang } from '../../lib/embed';
+
+const en = {
+	title: 'Typing test',
+	modes: { words: 'words', code: 'code', shell: 'shell' },
+	mix: 'mix',
+	options: 'Round',
+	stats: { time: 'time', wpm: 'wpm', accuracy: 'accuracy', best: 'best' },
+	source: { words: { en: 'english', id: 'indonesian' }, shell: '~/homelab' },
+	wordsIn: { en: 'English words', id: 'Indonesian words' },
+	input: 'Type the text shown',
+	focus: 'Click here or start typing',
+	focusTouch: 'Tap here to start typing',
+	restart: 'restart',
+	hints: {
+		restart: 'restart',
+		close: 'close',
+		words: 'next word',
+		code: 'new line, indented for you',
+		shell: 'run',
+	},
+	result: {
+		wpm: 'wpm',
+		raw: 'raw',
+		accuracy: 'accuracy',
+		time: 'time',
+		chars: 'chars',
+		charsTitle: 'right / wrong / extra / skipped',
+		missed: 'most-missed keys',
+		clean: 'not a single miss',
+		best: 'personal best',
+		newBest: 'new personal best',
+		was: 'was',
+		next: 'next',
+		retry: 'retry',
+	},
+	keys: { space: 'space', enter: 'enter' },
+	announce: (wpm: number, accuracy: number) => `${wpm} words per minute, ${accuracy}% accuracy.`,
+};
+
+export type Text = typeof en;
+
+const id: Text = {
+	title: 'Tes mengetik',
+	modes: { words: 'kata', code: 'kode', shell: 'shell' },
+	mix: 'campur',
+	options: 'Ronde',
+	stats: { time: 'waktu', wpm: 'wpm', accuracy: 'akurasi', best: 'rekor' },
+	source: { words: { en: 'bahasa inggris', id: 'bahasa indonesia' }, shell: '~/homelab' },
+	wordsIn: { en: 'Kata bahasa Inggris', id: 'Kata bahasa Indonesia' },
+	input: 'Ketik teks yang ditampilkan',
+	focus: 'Klik di sini atau langsung ketik',
+	focusTouch: 'Ketuk di sini untuk mulai mengetik',
+	restart: 'ulang',
+	hints: {
+		restart: 'ulang',
+		close: 'tutup',
+		words: 'kata berikutnya',
+		code: 'baris baru, indentasi otomatis',
+		shell: 'jalankan',
+	},
+	result: {
+		wpm: 'wpm',
+		raw: 'mentah',
+		accuracy: 'akurasi',
+		time: 'waktu',
+		chars: 'karakter',
+		charsTitle: 'benar / salah / lebih / dilewati',
+		missed: 'tombol paling sering meleset',
+		clean: 'tanpa satu pun salah',
+		best: 'rekor pribadi',
+		newBest: 'rekor pribadi baru',
+		was: 'sebelumnya',
+		next: 'lanjut',
+		retry: 'ulangi',
+	},
+	keys: { space: 'spasi', enter: 'enter' },
+	announce: (wpm, accuracy) => `${wpm} kata per menit, akurasi ${accuracy}%.`,
+};
+
+export const texts: Record<Lang, Text> = { en, id };
