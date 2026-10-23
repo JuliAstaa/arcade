@@ -1,0 +1,617 @@
+/*
+ * Pipeline's window, in the typing test's frame: a HUD and meter on top, the
+ * board beside its CI log, key hints at the bottom. GameLayout (src/layouts/)
+ * puts it on the page: centred under the header standalone, filling the frame
+ * when embedded.
+ */
+
+.pipeline {
+	--veil: light-dark(rgb(243 239 231 / 0.9), rgb(19 18 16 / 0.9));
+	display: flex;
+	flex: 0 1 620px;
+	flex-direction: column;
+	width: min(880px, 100%);
+	min-height: 0;
+	margin: auto;
+	border: 1px solid var(--line-strong);
+	background: var(--bg);
+	color: var(--ink);
+	font-family: var(--font-mono);
+	font-size: 0.8rem;
+	line-height: 1.5;
+}
+
+:root[data-embed] .pipeline {
+	flex: 1;
+	width: 100%;
+	border: 0;
+}
+
+/* ---------- HUD ---------- */
+
+.pipeline__hud {
+	display: grid;
+	flex: none;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 1px;
+	background: var(--line);
+}
+
+.pipeline__stat {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	min-width: 0;
+	padding: 12px 16px;
+	background: var(--bg);
+}
+
+.pipeline__stat-label {
+	color: var(--muted);
+	font-size: 0.66rem;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+}
+
+.pipeline__stat-value {
+	font-family: var(--font-display);
+	font-size: 1.25rem;
+	font-variant-numeric: tabular-nums;
+	font-weight: 700;
+	line-height: 1.1;
+}
+
+/* The CI budget left, running down. */
+.pipeline__meter {
+	flex: none;
+	height: 3px;
+	background: var(--line);
+}
+
+.pipeline__meter span {
+	display: block;
+	height: 100%;
+	background: var(--ink);
+	transform-origin: left;
+}
+
+.pipeline[data-hurry] [data-stat='time'] {
+	color: var(--accent);
+}
+
+.pipeline[data-hurry] .pipeline__meter span {
+	background: var(--accent);
+}
+
+/* ---------- Stage: the board beside its log ---------- */
+
+.pipeline__stage {
+	position: relative;
+	display: grid;
+	flex: 1;
+	grid-template-columns: minmax(0, 1fr) minmax(180px, 240px);
+	gap: clamp(16px, 3vw, 28px);
+	min-height: 0;
+	padding: clamp(16px, 3vw, 28px);
+	overflow: hidden;
+}
+
+.pipeline__wrap {
+	display: grid;
+	place-items: center;
+	min-width: 0;
+	min-height: 0;
+	overflow: hidden;
+}
+
+/* Hairlines from the gaps, as in the portfolio's grids; the size comes from fitBoard() in main.ts. */
+.pipeline__board {
+	display: grid;
+	grid-template-columns: repeat(var(--n, 5), minmax(0, 1fr));
+	gap: 1px;
+	width: var(--board, 320px);
+	height: var(--board, 320px);
+	border: 1px solid var(--line);
+	background: var(--line);
+}
+
+.tile {
+	position: relative;
+	display: grid;
+	place-items: center;
+	min-width: 0;
+	min-height: 0;
+	padding: 0;
+	overflow: hidden;
+	border: 0;
+	background: var(--bg);
+	color: var(--line-strong);
+	cursor: pointer;
+	touch-action: manipulation;
+	-webkit-tap-highlight-color: transparent;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	user-select: none;
+	transition:
+		background-color 0.2s,
+		color 0.15s;
+}
+
+.tile:hover {
+	background: var(--bg-raised);
+}
+
+.tile:focus-visible {
+	z-index: 1;
+	outline: 2px solid var(--ink);
+	outline-offset: -2px;
+}
+
+/* Joined to PUSH: the line so far. */
+.tile[data-lit] {
+	color: var(--ink);
+}
+
+/* A shipped line, run through in the accent. */
+.tile[data-run] {
+	color: var(--accent);
+}
+
+.tile__pipe {
+	grid-area: 1 / 1;
+	width: 100%;
+	height: 100%;
+	fill: currentColor;
+	stroke: currentColor;
+	stroke-width: 18;
+	stroke-linecap: butt;
+}
+
+.tile__pipe path {
+	fill: none;
+}
+
+.tile__pipe circle,
+.tile__pipe rect {
+	stroke: none;
+}
+
+/* Pieces that can't turn sit on the raised colour; a locked pipe also has a corner notch. */
+.tile[data-fixed],
+.tile[data-locked] {
+	background: var(--bg-raised);
+	cursor: default;
+}
+
+.tile[data-locked]::after {
+	content: '';
+	position: absolute;
+	top: 5px;
+	right: 5px;
+	width: 6px;
+	height: 6px;
+	border-top: 2px solid var(--muted);
+	border-right: 2px solid var(--muted);
+}
+
+/* PUSH, PROD and the stages: a mono plate over the pipe, never turned. */
+.tile__label {
+	z-index: 1;
+	grid-area: 1 / 1;
+	max-width: calc(100% - 6px);
+	padding: 3px 4px;
+	overflow: hidden;
+	border: 1px solid currentColor;
+	background: var(--bg-raised);
+	color: var(--muted);
+	font-size: clamp(0.5rem, 0.4rem + 0.6vw, 0.62rem);
+	font-weight: 500;
+	letter-spacing: 0.08em;
+	line-height: 1;
+	text-transform: uppercase;
+	white-space: nowrap;
+}
+
+.tile[data-lit] .tile__label {
+	color: var(--ink);
+}
+
+.tile[data-run] .tile__label {
+	color: var(--accent);
+}
+
+.tile[data-kind='push'] .tile__label,
+.tile[data-kind='prod'] .tile__label {
+	background: var(--ink);
+	color: var(--bg);
+	border-color: var(--ink);
+}
+
+.tile[data-kind='push'][data-run] .tile__label,
+.tile[data-kind='prod'][data-run] .tile__label {
+	background: var(--accent);
+	border-color: var(--accent);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	.tile__pipe {
+		transition: transform 0.2s var(--ease-out);
+	}
+
+	.tile[data-refused] .tile__pipe,
+	.tile[data-refused] .tile__label {
+		animation: pipeline-refuse 0.24s var(--ease-out);
+	}
+
+	.pipeline__line {
+		animation: pipeline-line 0.24s var(--ease-out);
+	}
+}
+
+@keyframes pipeline-refuse {
+	25% {
+		translate: -3px 0;
+	}
+	75% {
+		translate: 3px 0;
+	}
+}
+
+@keyframes pipeline-line {
+	from {
+		opacity: 0;
+		translate: 0 4px;
+	}
+}
+
+/* ---------- Side: the run, the route, the CI log ---------- */
+
+.pipeline__side {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+	min-width: 0;
+	min-height: 0;
+}
+
+.pipeline__run {
+	margin: 0;
+	color: var(--muted);
+}
+
+.pipeline__route {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px 18px;
+	align-items: center;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.pipeline__step {
+	position: relative;
+	padding: 4px 6px;
+	border: 1px solid var(--line);
+	color: var(--muted);
+	font-size: 0.64rem;
+	letter-spacing: 0.1em;
+	line-height: 1;
+	transition:
+		border-color 0.2s,
+		color 0.2s;
+}
+
+/* The arrow sits in the gap before each step, outside its box. */
+.pipeline__step + .pipeline__step::before {
+	content: '→';
+	position: absolute;
+	top: 50%;
+	right: 100%;
+	color: var(--line-strong);
+	translate: -3px -50%;
+}
+
+/* Reached by the line from PUSH. */
+.pipeline__step[data-lit] {
+	border-color: var(--ink);
+	color: var(--ink);
+}
+
+.pipeline__log {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	gap: 4px;
+	justify-content: flex-end;
+	min-height: 0;
+	overflow: hidden;
+	border-top: 1px solid var(--line);
+	padding-top: 12px;
+	color: var(--muted);
+	font-size: 0.72rem;
+}
+
+.pipeline__line {
+	margin: 0;
+	overflow-wrap: anywhere;
+}
+
+.pipeline__line[data-tone='ok'] {
+	color: var(--ink);
+}
+
+.pipeline__line[data-tone='bad'] {
+	color: var(--accent);
+}
+
+/* ---------- Start and end screens, as in the portfolio's Uptime ---------- */
+
+/* Centred by auto margins rather than justify-content, so a screen taller than the stage scrolls from its top. */
+.pipeline__screen {
+	position: absolute;
+	inset: 0;
+	z-index: 2;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	align-items: flex-start;
+	padding: 24px clamp(20px, 5vw, 40px);
+	overflow-y: auto;
+	background: var(--veil);
+	-webkit-backdrop-filter: blur(3px);
+	backdrop-filter: blur(3px);
+}
+
+.pipeline__screen[hidden] {
+	display: none;
+}
+
+.pipeline__screen:focus {
+	outline: none;
+}
+
+.pipeline__screen > * {
+	margin: 0;
+}
+
+.pipeline__screen > :first-child {
+	margin-top: auto;
+}
+
+.pipeline__screen > :last-child {
+	margin-bottom: auto;
+}
+
+.pipeline__title,
+.pipeline__result-value {
+	font-family: var(--font-display);
+	font-size: clamp(2.4rem, 1.6rem + 3vw, 3.4rem);
+	font-weight: 800;
+	letter-spacing: -0.04em;
+	line-height: 1;
+	text-transform: uppercase;
+}
+
+.pipeline__tagline {
+	max-width: 44ch;
+	color: var(--ink-soft);
+	font-family: var(--font-sans);
+	font-size: 1rem;
+}
+
+.pipeline__rules {
+	display: grid;
+	gap: 6px;
+	max-width: 62ch;
+	margin-top: 4px;
+	padding: 0;
+	list-style: none;
+}
+
+.pipeline__rule {
+	display: flex;
+	gap: 12px;
+	color: var(--ink-soft);
+}
+
+.pipeline__key {
+	flex: none;
+	width: 7ch;
+	color: var(--ink);
+	font-weight: 500;
+	text-transform: uppercase;
+}
+
+.pipeline__over {
+	color: var(--accent);
+	font-weight: 500;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+}
+
+.pipeline__result {
+	display: flex;
+	gap: 12px;
+	align-items: baseline;
+}
+
+.pipeline__result-value {
+	font-variant-numeric: tabular-nums;
+}
+
+.pipeline__detail {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px 24px;
+	color: var(--muted);
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+.pipeline__detail strong {
+	margin-left: 6px;
+	color: var(--ink);
+	font-weight: 500;
+}
+
+.pipeline__new {
+	color: var(--accent);
+	font-family: var(--font-serif);
+	font-size: 1.45rem;
+	font-style: italic;
+	line-height: 1.1;
+}
+
+.pipeline__new[hidden] {
+	display: none;
+}
+
+.pipeline__button {
+	min-height: 44px;
+	margin-top: 8px;
+	padding: 0 22px;
+	border: 1px solid var(--ink);
+	background: var(--ink);
+	color: var(--bg);
+	font-family: var(--font-mono);
+	font-size: 0.72rem;
+	font-weight: 500;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	cursor: pointer;
+	touch-action: manipulation;
+	transition: background-color 0.2s;
+}
+
+.pipeline__button:hover {
+	background: var(--ink-soft);
+}
+
+/* ---------- Footer ---------- */
+
+.pipeline__foot {
+	display: flex;
+	flex: none;
+	gap: 12px;
+	align-items: stretch;
+	justify-content: space-between;
+	min-height: 40px;
+	border-top: 1px solid var(--line);
+}
+
+.pipeline__hints {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px 18px;
+	align-items: center;
+	margin: 0;
+	padding: 8px 16px;
+	color: var(--muted);
+	font-size: 0.68rem;
+}
+
+.pipeline__hint {
+	display: inline-flex;
+	gap: 5px;
+	align-items: center;
+}
+
+.pipeline__hint span {
+	margin-left: 3px;
+}
+
+.pipeline kbd {
+	display: inline-grid;
+	place-items: center;
+	min-width: 1.9em;
+	height: 1.7em;
+	padding: 0 0.45em;
+	border: 1px solid var(--line-strong);
+	border-bottom-width: 2px;
+	background: var(--bg-raised);
+	color: var(--ink);
+	font-family: var(--font-mono);
+	font-size: 0.64rem;
+	font-weight: 500;
+	line-height: 1;
+}
+
+.pipeline__restart {
+	flex: none;
+	margin-left: auto;
+	padding: 0 18px;
+	border: 0;
+	border-left: 1px solid var(--line);
+	background: transparent;
+	color: var(--ink-soft);
+	font-family: var(--font-mono);
+	font-size: 0.68rem;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	cursor: pointer;
+	touch-action: manipulation;
+}
+
+.pipeline__restart:hover {
+	background: var(--bg-raised);
+	color: var(--ink);
+}
+
+.pipeline__restart:focus-visible {
+	outline-offset: -4px;
+}
+
+/* Keyboard hints mean nothing on a touch screen; the restart button stays. */
+@media (pointer: coarse) {
+	.pipeline__hints {
+		display: none;
+	}
+}
+
+/* ---------- Phones ---------- */
+
+@media (max-width: 559px) {
+	.pipeline {
+		flex: 1;
+		border-width: 1px 0 0;
+	}
+
+	.pipeline__stat {
+		padding: 10px 12px;
+	}
+
+	.pipeline__stat-value {
+		font-size: 1.05rem;
+	}
+
+	/* The board on top, full width; the route and the last lines of the log under it. */
+	.pipeline__stage {
+		grid-template-columns: minmax(0, 1fr);
+		grid-template-rows: auto minmax(0, 1fr);
+		gap: 12px;
+		padding: 12px;
+		overflow-y: auto;
+	}
+
+	.pipeline__side {
+		gap: 10px;
+	}
+
+	.pipeline__log {
+		max-height: calc(4 * 1.5em + 12px);
+		padding-top: 8px;
+	}
+
+	.pipeline__screen {
+		padding: 20px;
+	}
+
+	.pipeline__tagline {
+		font-size: 0.95rem;
+	}
+
+	.pipeline__rules {
+		font-size: 0.75rem;
+	}
+}

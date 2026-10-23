@@ -1,0 +1,75 @@
+---
+/*
+ * Pipeline's markup, in English; main.ts switches its labels to Indonesian
+ * with ?lang=id, builds the board and runs the levels.
+ */
+import './style.css';
+---
+
+<main class="pipeline" data-pipeline data-phase="intro">
+	<h1 class="visually-hidden" data-i18n="title">Pipeline</h1>
+
+	<div class="pipeline__hud">
+		<div class="pipeline__stat">
+			<span class="pipeline__stat-label" data-i18n="stats.level">level</span>
+			<span class="pipeline__stat-value" data-stat="level">1</span>
+		</div>
+		<div class="pipeline__stat">
+			<span class="pipeline__stat-label" data-i18n="stats.time">ci time</span>
+			<span class="pipeline__stat-value" data-stat="time">01:00</span>
+		</div>
+		<div class="pipeline__stat">
+			<span class="pipeline__stat-label" data-i18n="stats.moves">moves</span>
+			<span class="pipeline__stat-value" data-stat="moves">0</span>
+		</div>
+		<div class="pipeline__stat">
+			<span class="pipeline__stat-label" data-i18n="stats.best">best</span>
+			<span class="pipeline__stat-value" data-stat="best">–</span>
+		</div>
+	</div>
+	<div class="pipeline__meter" aria-hidden="true"><span data-meter></span></div>
+
+	<div class="pipeline__stage">
+		<div class="pipeline__wrap" data-wrap>
+			<div class="pipeline__board" role="group" aria-label="Board" data-board data-i18n-label="board"></div>
+		</div>
+
+		<aside class="pipeline__side">
+			<p class="pipeline__run label" data-run></p>
+			<ol class="pipeline__route" data-route></ol>
+			<div class="pipeline__log" data-log></div>
+		</aside>
+
+		<section class="pipeline__screen" aria-labelledby="pipeline-title" data-screen="intro">
+			<p class="pipeline__title" id="pipeline-title" data-i18n="title">Pipeline</p>
+			<p class="pipeline__tagline" data-i18n="tagline"></p>
+			<ul class="pipeline__rules" data-rules></ul>
+			<button class="pipeline__button" type="button" data-start data-i18n="start">start run</button>
+		</section>
+
+		<section class="pipeline__screen" aria-labelledby="pipeline-over" tabindex="-1" hidden data-screen="over">
+			<p class="pipeline__over" id="pipeline-over" data-i18n="over.title">build timed out</p>
+			<div class="pipeline__result">
+				<span class="pipeline__result-value" data-result="cleared"></span>
+				<span class="pipeline__stat-label" data-i18n="over.cleared">levels cleared</span>
+			</div>
+			<p class="pipeline__detail">
+				<span><span data-i18n="over.score">score</span> <strong data-result="score"></strong></span>
+				<span><span data-i18n="over.best">best</span> <strong data-result="best"></strong></span>
+			</p>
+			<p class="pipeline__new" hidden data-result="new" data-i18n="over.newBest">new personal best</p>
+			<button class="pipeline__button" type="button" data-again data-i18n="over.again">run again</button>
+		</section>
+	</div>
+
+	<div class="pipeline__foot">
+		<p class="pipeline__hints" data-hints></p>
+		<button class="pipeline__restart" type="button" data-restart data-i18n="restart">restart level</button>
+	</div>
+
+	<p class="visually-hidden" aria-live="polite" data-announce></p>
+</main>
+
+<script>
+	import './main';
+</script>
